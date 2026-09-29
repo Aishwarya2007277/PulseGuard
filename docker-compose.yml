@@ -1,0 +1,42 @@
+# PulseGuard Docker Compose
+# Local development and testing environment
+# ------------------------------------------
+
+version: '3.8'
+
+services:
+  # PulseGuard Application
+  pulseguard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulseguard-app
+    image: pulseguard:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - ENVIRONMENT=production
+      - PORT=5000
+      - DEBUG=False
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - pulseguard-network
+    labels:
+      - "com.pulseguard.description=PulseGuard DevOps Platform"
+      - "com.pulseguard.version=1.0.0"
+
+networks:
+  pulseguard-network:
+    driver: bridge
+    name: pulseguard-network
+
+# Volumes can be added later for persistent data if needed
+# volumes:
+#   pulseguard-data:
+#     name: pulseguard-data
